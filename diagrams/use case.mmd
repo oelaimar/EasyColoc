@@ -1,0 +1,66 @@
+flowchart LR
+%% Actors
+    Admin((Admin))
+    Owner((Owner))
+    Member((Member))
+
+    subgraph "EasyColoc"
+        direction TB
+    %% Use cases (stadium shapes)
+        UC1([Access to global statistics])
+        UC2([ban / unban users])
+        UC3([Create a Coloc])
+        UC4([Invite members])
+        UC5([Cancel the Coloc])
+        UC6([Remove a member])
+        UC7([Manage categories])
+        UC8([joining an existing coloc via invitation])
+        UC9([Leaving a Coloc])
+        UC10([View balance and 'who owes whom'])
+        UC11([Add an expense])
+        UC12([View members, roles and reputation])
+        UC13([Mark a payment])
+
+        Auth([Auth]):::authStyle
+    end
+
+%% Styles
+    classDef authStyle fill:#fff2cc,stroke:#d6b656,stroke-width:2px;
+
+%% Admin Connections
+    Admin ---> UC1
+    Admin ---> UC2
+
+%% Owner Connections
+    Owner ---> UC3
+    Owner ---> UC4
+    Owner ---> UC5
+    Owner ---> UC6
+    Owner ---> UC7
+
+%% Member Connections
+    Member ---> UC8
+    Member ---> UC9
+    Member ---> UC10
+    Member ---> UC11
+    Member ---> UC12
+    Member ---> UC13
+
+%% Include Relationships (Dashed lines)
+    UC1 -.->|include| Auth
+    UC2 -.->|include| Auth
+    UC3 -.->|include| Auth
+    UC4 -.->|include| Auth
+    UC5 -.->|include| Auth
+    UC6 -.->|include| Auth
+    UC7 -.->|include| Auth
+    UC8 -.->|include| Auth
+    UC9 -.->|include| Auth
+    UC10 -.->|include| Auth
+    UC11 -.->|include| Auth
+    UC12 -.->|include| Auth
+    UC13 -.->|include| Auth
+
+%% The Actors
+    Admin ---> Owner
+    Owner ---> Member
