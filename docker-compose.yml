@@ -5,6 +5,8 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: EasyColocation_app
     working_dir: /var/www
+    ports:
+      - "5173:5173"
     volumes:
       - ./src:/var/www
     depends_on:
