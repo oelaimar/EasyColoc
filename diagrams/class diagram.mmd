@@ -1,0 +1,66 @@
+classDiagram
+    class User {
+        -name : string
+        -email: string
+        -password: string
+        -reputation_score: int
+        -is_admin: boolean
+        -is_banned: boolean
+        +register()
+        +login()
+        +updateProfile()
+    }
+
+    class Colocation {
+        -name: string
+        -status: enum "active, canceled"
+        -created_at: DATETIME
+        -cancelled_at: DATETIME
+        +create()
+        +cancel()
+        +calculateBalances()
+    }
+
+    class Membership {
+        -join_at: DATE
+        -left_at: DATE
+        -balance_at_exit: float
+        -status: enum "pending, join"
+        -token: string
+        +leave()
+        +removeMember()
+    }
+
+    class Expense {
+        -name:string
+        -amount: float
+        -date: date
+        +add()
+        +delete()
+        +filterByMonth()
+    }
+
+    class Category {
+        +string name
+        +add()
+        +delete()
+    }
+
+    class Payment {
+        -name:string
+        -amount: float
+        -is_payed: boolean
+        -date: date
+        +markAsPaid()
+    }
+
+    User -- "*" Payment : payer
+    Expense "1" -- "*" Payment
+    User -- "*" Expense : receive
+    Membership "*" -- "*" Colocation
+    User "*" -- "*" Colocation
+    User * -- "*" Colocation : owned by
+    Expense -- "*" Category
+    Colocation * -- "*" Category
+    Membership "*" -- "*" User
+    Colocation * -- "*" Expense

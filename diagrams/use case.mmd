@@ -20,8 +20,12 @@ flowchart LR
         UC11([Add an expense])
         UC12([View members, roles and reputation])
         UC13([Mark a payment])
+        UC14([Register])
 
         Auth([Auth]):::authStyle
+        DeptOwner([add dept to the owner]):::authStyle
+        Reputation([update the reputation]):::authStyle
+        Balance([update the balance]):::authStyle
     end
 
 %% Styles
@@ -45,6 +49,7 @@ flowchart LR
     Member ---> UC11
     Member ---> UC12
     Member ---> UC13
+    Member ---> UC14
 
 %% Include Relationships (Dashed lines)
     UC1 -.->|include| Auth
@@ -60,6 +65,12 @@ flowchart LR
     UC11 -.->|include| Auth
     UC12 -.->|include| Auth
     UC13 -.->|include| Auth
+    UC14 -.->|include| Auth
+
+    Balance -.->|extend| UC13
+    DeptOwner -.->|extend| UC6
+    Reputation -.->|extend| UC9
+
 
 %% The Actors
     Admin ---> Owner
