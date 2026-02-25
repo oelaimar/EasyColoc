@@ -11,6 +11,6 @@ class Membership extends Model
         'user_id',
         'colocation_id',
         'role',
-        'joined_at',
+        'join_at',
     ];
 }

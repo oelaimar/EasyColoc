@@ -26,7 +26,7 @@ class User extends Authenticatable
     {
         static::creating(function ($user){
             if(static::count() === 0){
-                $user->is_admin = true;
+                $user->is_global_admin = true;
             }
         });
     }

@@ -14,14 +14,16 @@ Route::get('/dashboard', function () {
 
 Route::middleware('auth')->group(function () {
     Route::middleware(['single.colocation'])->group(function (){
-        Route::get('/colocation/create', [ColocationController::class, 'create'])->name('colocations.create');
-        Route::post('/colocation/store', [ColocationController::class, 'store'])->name('colocations.store');
+        Route::get('/colocations/create', [ColocationController::class, 'create'])->name('colocations.create');
+        Route::post('/colocations', [ColocationController::class, 'store'])->name('colocations.store');
+        Route::post('/colocations/join', [ColocationController::class, 'join'])->name('colocations.join');
     });
+    Route::get('/colocations/my-home', [ColocationController::class, 'show'])->name('colocations.show');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/colocation/dashboard', [ColocationController::class, 'show'])->name('colocations.show');
 
 require __DIR__.'/auth.php';

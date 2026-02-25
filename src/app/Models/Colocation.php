@@ -8,8 +8,8 @@ class Colocation extends Model
 {
     protected $fillable = [
         'name',
-        'token',
         'status',
+        'invite_token',
     ];
 
     public function members()

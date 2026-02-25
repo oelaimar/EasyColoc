@@ -12,11 +12,7 @@ class ColocationController extends Controller
 {
     public function create(Request $request)
     {
-        return Colocation::create([
-            'name' => $request->name,
-            'token' => Str::random(32),
-            'status' => 'active',
-        ]);
+        return view('colocation.create');
     }
     public function store(Request $request)
     {
@@ -24,34 +20,36 @@ class ColocationController extends Controller
            'name' => 'required|string|max:225'
         ]);
 
-        //if user is already in a colocation
-        if(auth()->user()->current_colocation_id){
-            return back()->with('error', 'you are already in a colocation.');
-        }
-
         //create Colocation
-        $colocation = $this->create($request);
+        $colocation = Colocation::create([
+            'name' => $request->name,
+            'invite_token' => Str::random(32),
+            'status' => 'active',
+        ]);
         //create Membership
         Membership::create([
             'user_id' => auth()->id(),
             'colocation_id' => $colocation->id,
             'role' => 'owner',
-            'joined_at' => now(),
+            'join_at' => now(),
         ]);
 
         //update user currentColocation
         auth()->user()->update(['current_colocation_id' => $colocation->id]);
 
-        return redirect()->route('colocations.show', $colocation)->with('success', 'Colocation created!');
+        return redirect()->route('colocations.show', $colocation)
+            ->with('success', 'Your Colocation' . $colocation->name . 'has been created!!');
     }
     public function join(Request $request)
     {
-        $request->validate(['token' => 'required|string']);
+        $request->validate(['token' => 'required|string|size:32']);
 
-        $colocation = Colocation::where('token', $request->token)->firstOrFail();
-        //if user is already in a colocation
-        if(auth()->user()->current_colocation_id){
-            return back()->with('error', 'you are already in a colocation.');
+        $colocation = Colocation::where('invite_token', $request->token)
+                ->where('status', 'active')
+                ->first();
+
+        if (!$colocation) {
+            return back()->withErrors(['token' => 'This invitation token is invalid or the group no longer exists.']);
         }
         Membership::create([
             'user_id' => auth()->id(),
@@ -61,6 +59,28 @@ class ColocationController extends Controller
         ]);
         auth()->user()->update(['current_colocation_id' => $colocation->id]);
 
-        return redirect()->route('colocations.show', $colocation);
+        return redirect()->route('colocations.show')
+            ->with('success', 'welcome to ' . $colocation->name . '!');
+    }
+    public function show()
+    {
+        $user = auth()->user();
+
+        if (!$user->current_colocation_id) {
+            return redirect()->route('colocations.create');
+        }
+
+        //the colocation with all member that enroll on it
+        $colocation = Colocation::with([
+            'members' => function($query){
+                $query->wherePivot('left_at', null);
+            },
+            'expenses' => function($query) {
+                $query->latest()->limit(5);
+            }
+            ])->findOrFail($user->current_colocation_id);
+
+        $totalSpent = $colocation->expenses->sum('amount');
+        return view('colocation.dashboard', compact('colocation','totalSpent'));
     }
 }

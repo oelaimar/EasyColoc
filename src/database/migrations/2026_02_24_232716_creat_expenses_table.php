@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->float('amount', 10, 2);
             $table->date('date');
-            $table->timestamp();
+            $table->timestamps();
         });
     }
     public function down(): void
