@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Colocation;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\User;
@@ -22,7 +23,7 @@ class PaymentService
                     'debtor_id' => $member->id,
                     'creditor_id' => $expense->user_id,
                     'amount' => $splitAmount,
-                    'status' => 'pending'
+                    'status' => 'pending',
                 ]);
             }
         }

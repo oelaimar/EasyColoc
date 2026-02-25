@@ -13,9 +13,10 @@ return new class extends Migration
             $table->foreignId('colocation_id')->constrained('colocations')->cascadeOnDelete();
             $table->foreignId('debtor_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('creditor_id')->constrained('users')->cascadeOnDelete();
-            $table->float('amount');
-            $table->enum('status', ['pending','paid']);
+            $table->float('amount',10, 2);
+            $table->enum('status', ['pending','paid'])->default('pending');
             $table->timestamp('paid_at')->nullable();
+            $table->timestamps();
         });
     }
     public function down(): void

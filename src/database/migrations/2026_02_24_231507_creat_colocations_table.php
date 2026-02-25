@@ -11,11 +11,9 @@ return new class extends Migration
         schema::create('colocations', function (Blueprint $table){
             $table->id();
             $table->string('name');
-            $table->string('token')->unique();
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
-            $table->enum('status', ['active', 'cancelled']);
-            $table->timestamp('create_at');
-            $table->timestamp('cancelled_at');
+            $table->string('invite_token', 32)->unique();
+            $table->enum('status', ['active', 'cancelled'])->default('active');
+            $table->timestamps();
         });
     }
     public function down(): void

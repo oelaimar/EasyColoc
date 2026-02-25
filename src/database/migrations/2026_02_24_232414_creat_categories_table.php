@@ -11,7 +11,7 @@ return new class extends Migration
         schema::create('categories', function (Blueprint $table){
             $table->id();
             $table->string('name');
-            $table->integer('colocation_id')->nullable();
+            $table->timestamps();
         });
     }
     public function down(): void

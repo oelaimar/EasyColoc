@@ -14,8 +14,9 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
             $table->string('title');
-            $table->float('amount');
-            $table->timestamp('created_at');
+            $table->float('amount', 10, 2);
+            $table->date('date');
+            $table->timestamp();
         });
     }
     public function down(): void

@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Colocation extends Model
 {
+    protected $fillable = [
+        'name',
+        'token',
+        'status',
+    ];
+
     public function members()
     {
         return $this->belongsToMany(User::class, 'memberships')
