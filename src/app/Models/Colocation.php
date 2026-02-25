@@ -6,12 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class Colocation extends Model
 {
-    public function memberships()
+    public function members()
     {
-        return $this->hasMany(Membership::class);
+        return $this->belongsToMany(User::class, 'memberships')
+                    ->withPivot('role', 'join_at', 'left_at')
+                    ->wherePivot('left_at', 'null');
     }
     public function expenses()
     {
         return $this->hasMany(Expense::class);
+    }
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+    //this for get the owner quickly
+    public function owner()
+    {
+        return $this->members()->withPivot('role', 'owner')->first();
     }
 }

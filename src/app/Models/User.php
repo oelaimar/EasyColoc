@@ -52,12 +52,18 @@ class User extends Authenticatable
     {
         return $this->hasMany(Membership::class);
     }
-    public function colocations()
+    // The colocation the user is currently active in
+    public function currentColocation()
     {
-        return $this->belongsTo(Colocation::class);
+        return $this->belongsTo(Colocation::class, 'current_colocation_id');
     }
     public function expenses()
     {
         return $this->hasMany(Expense::class);
+    }
+    // Debts the user needs to pay
+    public function debts()
+    {
+        return $this->hasMany(Payment::class, 'debtor_id')->where('status', 'pending');
     }
 }

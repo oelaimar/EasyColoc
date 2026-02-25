@@ -6,20 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Expense extends Model
 {
-    public function users()
+    public function payer()
     {
-        $this->belongsTo(User::class);
+        $this->belongsTo(User::class, 'user_id');
     }
-    public function categories()
+    public function category()
     {
         return $this->belongsTo(Category::class);
     }
-    public function colocations()
+    public function colocation()
     {
         return $this->belongsTo(Colocation::class);
-    }
-    public function payments()
-    {
-        return $this->hasMany(Payment::class);
     }
 }
