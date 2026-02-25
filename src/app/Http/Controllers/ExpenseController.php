@@ -2,14 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Payment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $user = auth()->user();
+        $colocation = $user->currentColocation;
+
+        $query = $colocation->expenses()->with(['category','payer']);
+
+        if($request->has('month') && $request->month != 'all'){
+            $date = Carbon::parse($request->month);
+            $query->whereMonth('date', $date->month)
+                ->whereYear('date', $date->year);
+        }
+
+        $expenses = $query->get();
+        $categories = Category::all();
+
+        return view('expenses.index', compact('expenses', 'categories'));
     }
     public function create()
     {
@@ -50,33 +66,5 @@ class ExpenseController extends Controller
             }
         }
         return back()->with('success', 'Expense added and split!');
-    }
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

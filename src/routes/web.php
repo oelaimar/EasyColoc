@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ColocationController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/colocations/join', [ColocationController::class, 'join'])->name('colocations.join');
     });
     Route::get('/colocations/my-home', [ColocationController::class, 'show'])->name('colocations.show');
+
+    Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
