@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin',
+        'is_banned',
+        'current_colocation_id',
     ];
 
     /**
@@ -44,5 +47,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function memberships()
+    {
+        return $this->hasMany(Membership::class);
+    }
+    public function colocations()
+    {
+        return $this->belongsTo(Colocation::class);
+    }
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
     }
 }
