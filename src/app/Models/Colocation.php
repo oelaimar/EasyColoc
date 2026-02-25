@@ -16,7 +16,7 @@ class Colocation extends Model
     {
         return $this->belongsToMany(User::class, 'memberships')
                     ->withPivot('role', 'join_at', 'left_at')
-                    ->wherePivot('left_at', 'null');
+                    ->wherePivotNull('left_at');
     }
     public function expenses()
     {
@@ -29,6 +29,10 @@ class Colocation extends Model
     //this for get the owner quickly
     public function owner()
     {
-        return $this->members()->withPivot('role', 'owner')->first();
+        return $this->members()->wherePivot('role', 'owner')->first();
+    }
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
     }
 }

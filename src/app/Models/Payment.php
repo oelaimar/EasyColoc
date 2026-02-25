@@ -12,6 +12,7 @@ class Payment extends Model
         'creditor_id',
         'amount',
         'status',
+        'paid_at',
     ];
 
     public function debtor()

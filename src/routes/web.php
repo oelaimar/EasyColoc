@@ -1,29 +1,46 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', function(){
+   if(auth()->check()){
+       return redirect()->route('colocations.show');
+   }
+   return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
+
+    // user without colocation
     Route::middleware(['single.colocation'])->group(function (){
         Route::get('/colocations/create', [ColocationController::class, 'create'])->name('colocations.create');
         Route::post('/colocations', [ColocationController::class, 'store'])->name('colocations.store');
         Route::post('/colocations/join', [ColocationController::class, 'join'])->name('colocations.join');
     });
-    Route::get('/colocations/my-home', [ColocationController::class, 'show'])->name('colocations.show');
 
+    // user that have a colocation
+    Route::get('/dashboard', [ColocationController::class, 'show'])->name('colocations.show');
+    Route::post('/colocations/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
+
+    // Expenses
     Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
     Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
 
+    // Payments
+    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::post('/payments/{payment}/pay', [PaymentController::class, 'pay'])->name('payments.pay');
+
+    // Categories
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // Profile (Standard Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

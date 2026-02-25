@@ -11,6 +11,7 @@ return new class extends Migration
         schema::create('categories', function (Blueprint $table){
             $table->id();
             $table->string('name');
+            $table->foreignId('colocation_id')->constrained('colocations')->cascadeOnDelete();
             $table->timestamps();
         });
     }

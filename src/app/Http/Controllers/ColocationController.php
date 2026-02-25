@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Middleware\CheckSingleColocation;
 use App\Models\Colocation;
 use App\Models\Membership;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -55,18 +56,33 @@ class ColocationController extends Controller
             'user_id' => auth()->id(),
             'colocation_id' => $colocation->id,
             'role' => 'member',
-            'joined_at' => now()
+            'join_at' => now()
         ]);
         auth()->user()->update(['current_colocation_id' => $colocation->id]);
 
         return redirect()->route('colocations.show')
             ->with('success', 'welcome to ' . $colocation->name . '!');
     }
+    public function leave()
+    {
+        $user = auth()->user();
+        $colocationId = $user->current_colocation_id;
+
+        Membership::where('user_id', $user->id)
+            ->where('colocation_id', $colocationId)
+            ->where('left_at')
+            ->whereNull(['left_at' => now()]);
+
+        $user->update(['current_colocation_id' => null]);
+
+        return redirect()->route('colocations.create')
+            ->with('success', 'You are left the colocation.');
+    }
     public function show()
     {
         $user = auth()->user();
-
-        if (!$user->current_colocation_id) {
+        $colocationId = $user->current_colocation_id;
+        if (!$colocationId) {
             return redirect()->route('colocations.create');
         }
 
@@ -80,7 +96,19 @@ class ColocationController extends Controller
             }
             ])->findOrFail($user->current_colocation_id);
 
-        $totalSpent = $colocation->expenses->sum('amount');
-        return view('colocation.dashboard', compact('colocation','totalSpent'));
+        $totalSpent = $colocation->expenses()->sum('amount');
+
+        $totalToReceive = Payment::where('creditor_id', $user->id)
+            ->where('colocation_id', $colocationId)
+            ->where('status', 'pending')
+            ->sum('amount');
+
+        $totalToPay = Payment::where('debtor_id', $user->id)
+            ->where('colocation_id', $colocationId)
+            ->where('status', 'pending')
+            ->sum('amount');
+
+        return view('colocation.dashboard', compact('colocation','totalSpent','totalToReceive', 'totalToPay'));
+
     }
 }
