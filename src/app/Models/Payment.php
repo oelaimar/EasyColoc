@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
+    protected $fillable = [
+        'colocation_id',
+        'debtor_id',
+        'creditor_id',
+        'amount',
+        'status',
+    ];
+
     public function debtor()
     {
         return $this->belongsTo(User::class, 'debtor_id');
