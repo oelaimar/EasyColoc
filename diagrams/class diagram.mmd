@@ -3,6 +3,7 @@ classDiagram
         -name : string
         -email: string
         -password: string
+        -current_colocation_id: int
         -reputation_score: int
         -is_admin: boolean
         -is_banned: boolean
@@ -14,6 +15,8 @@ classDiagram
     class Colocation {
         -name: string
         -status: enum "active, canceled"
+        -role: enum "owner, member"
+        -token: string
         -created_at: DATETIME
         -cancelled_at: DATETIME
         +create()
@@ -26,13 +29,12 @@ classDiagram
         -left_at: DATE
         -balance_at_exit: float
         -status: enum "pending, join"
-        -token: string
         +leave()
         +removeMember()
     }
 
     class Expense {
-        -name:string
+        -title:string
         -amount: float
         -date: date
         +add()
@@ -54,9 +56,16 @@ classDiagram
         +markAsPaid()
     }
 
-    User -- "*" Payment : payer
-    Expense "1" -- "*" Payment
-    User -- "*" Expense : receive
+    class Invitation {
+        -email:string
+        -token: string
+        +generateToken()
+        +sendEmail()
+    }
+
+    User -- "*" Payment : creditor
+    User -- "*" Payment : debtor
+    User -- "*" Expense : payer
     Membership "*" -- "*" Colocation
     User "*" -- "*" Colocation
     User * -- "*" Colocation : owned by
@@ -64,3 +73,4 @@ classDiagram
     Colocation * -- "*" Category
     Membership "*" -- "*" User
     Colocation * -- "*" Expense
+    Colocation * -- "*" Invitation
