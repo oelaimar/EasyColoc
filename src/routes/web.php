@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\ExpenseController;
@@ -16,6 +17,11 @@ Route::get('/', function(){
 });
 
 Route::middleware('auth')->group(function () {
+
+    //Admin toggle the ban and unban
+    Route::middleware(['auth', 'can:admin-only'])->prefix('admin')->group(function(){
+       Route::post('/user/{user}/toggle-ban',[AdminUserController::class, 'toggleBan'])->name('admin.user.toggleBan');
+    });
 
     // Users without a colocation
     Route::middleware(['single.colocation'])->group(function (){
