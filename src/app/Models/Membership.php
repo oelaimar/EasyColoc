@@ -12,5 +12,6 @@ class Membership extends Model
         'colocation_id',
         'role',
         'join_at',
+        'left_at',
     ];
 }
