@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DestroyCategoryRequest;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -31,11 +32,8 @@ class CategoryController extends Controller
         return back()->with('succuss','Category added');
     }
 
-    public function destroy(Category $category)
+    public function destroy(DestroyCategoryRequest $request, Category $category)
     {
-        if(auth()->user()->id !== $category->colocation->owner()->id){
-            return back()->with('error', 'unauthorized.');
-        }
         $category->delete();
         return back()->with('success', 'category deleted.');
     }
