@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\CheckSingleColocation;
+use App\Mail\ColocationInvite;
 use App\Models\Colocation;
 use App\Models\Membership;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ColocationController extends Controller
@@ -110,5 +113,15 @@ class ColocationController extends Controller
 
         return view('colocation.dashboard', compact('colocation','totalSpent','totalToReceive', 'totalToPay'));
 
+    }
+    public function sendInvite(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+        $colocation = auth()->user()->currentColocation;
+
+        //send the email
+        Mail::to($request->email)->send(new ColocationInvite($colocation));
+
+        return back()->with('success', 'invitation sent to' . $request->email);
     }
 }
