@@ -3,29 +3,33 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function(){
-   if(auth()->check()){
-       return redirect()->route('colocations.show');
-   }
-   return view('welcome');
+    if(auth()->check()){
+        return redirect()->route('colocations.show');
+    }
+    return view('welcome');
 });
 
 Route::middleware('auth')->group(function () {
 
-    // user without colocation
+    // Users without a colocation
     Route::middleware(['single.colocation'])->group(function (){
         Route::get('/colocations/create', [ColocationController::class, 'create'])->name('colocations.create');
         Route::post('/colocations', [ColocationController::class, 'store'])->name('colocations.store');
-        Route::post('/colocations/join', [ColocationController::class, 'join'])->name('colocations.join');
+
+        Route::post('/memberships/join', [MembershipController::class, 'store'])->name('memberships.join');
     });
 
-    // user that have a colocation
+    // Users that have a colocation
+
     Route::get('/dashboard', [ColocationController::class, 'show'])->name('colocations.show');
-    Route::post('/colocations/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
+
+    Route::delete('/memberships/leave', [MembershipController::class, 'destroy'])->name('memberships.leave');
 
     // Expenses
     Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
@@ -40,14 +44,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
-    //Email sender
+    // Email Invitations (Owner Only)
     Route::post('/colocations/invite', [ColocationController::class, 'sendInvite'])->name('colocations.sendInvite');
 
-    // Profile (Standard Breeze)
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
 
 require __DIR__.'/auth.php';
