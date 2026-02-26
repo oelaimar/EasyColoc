@@ -21,7 +21,7 @@ class ColocationController extends Controller
     {
         return view('colocation.create');
     }
-    public function store(storeColocationRequest $request)
+    public function store(StoreColocationRequest $request)
     {
         //create Colocation
         $colocation = Colocation::create([
@@ -41,9 +41,9 @@ class ColocationController extends Controller
         auth()->user()->update(['current_colocation_id' => $colocation->id]);
 
         return redirect()->route('colocations.show', $colocation)
-            ->with('success', 'Your Colocation' . $colocation->name . 'has been created!!');
+            ->with('success', 'Your Colocation ' . $colocation->name . ' has been created!!');
     }
-    public function join(joinColocationRequest $request)
+    public function join(JoinColocationRequest $request)
     {
 
         $colocation = Colocation::where('invite_token', $request->token)
@@ -71,8 +71,8 @@ class ColocationController extends Controller
 
         Membership::where('user_id', $user->id)
             ->where('colocation_id', $colocationId)
-            ->where('left_at')
-            ->whereNull(['left_at' => now()]);
+            ->whereNull('left_at')
+            ->update(['left_at' => now()]);
 
         $user->update(['current_colocation_id' => null]);
 
@@ -90,7 +90,7 @@ class ColocationController extends Controller
         //the colocation with all member that enroll on it
         $colocation = Colocation::with([
             'members' => function($query){
-                $query->wherePivot('left_at', null);
+                $query->wherePivotNull('left_at', null);
             },
             'expenses' => function($query) {
                 $query->latest()->limit(5);

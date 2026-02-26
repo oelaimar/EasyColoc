@@ -11,7 +11,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $colocation = auth()->user()->current_colocation_id;
+        $colocation = auth()->user()->currentColocation;
         $categories = $colocation->categories;
 
         return view('categories.index', compact('categories'));
@@ -29,7 +29,7 @@ class CategoryController extends Controller
         $colocation->categories()->create([
             'name' => $request->name,
         ]);
-        return back()->with('succuss','Category added');
+        return back()->with('success','Category added');
     }
 
     public function destroy(DestroyCategoryRequest $request, Category $category)

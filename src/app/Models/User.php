@@ -16,6 +16,7 @@ class User extends Authenticatable
         'password',
         'is_admin',
         'is_banned',
+        'is_global_admin',
         'current_colocation_id',
     ];
     protected $hidden = [

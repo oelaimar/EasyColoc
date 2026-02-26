@@ -6,9 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Expense extends Model
 {
+    protected $fillable = [
+        'amount',
+        'user_id',
+        'colocation_id',
+        'category_id',
+        'title',
+        'date',
+    ];
     public function payer()
     {
-        $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
     public function category()
     {
