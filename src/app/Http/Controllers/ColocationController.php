@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\CheckSingleColocation;
+use App\Http\Requests\JoinColocationRequest;
+use App\Http\Requests\SendInviteRequest;
+use App\Http\Requests\StoreColocationRequest;
 use App\Mail\ColocationInvite;
 use App\Models\Colocation;
 use App\Models\Membership;
@@ -18,12 +21,8 @@ class ColocationController extends Controller
     {
         return view('colocation.create');
     }
-    public function store(Request $request)
+    public function store(storeColocationRequest $request)
     {
-        $request->validate([
-           'name' => 'required|string|max:225'
-        ]);
-
         //create Colocation
         $colocation = Colocation::create([
             'name' => $request->name,
@@ -44,9 +43,8 @@ class ColocationController extends Controller
         return redirect()->route('colocations.show', $colocation)
             ->with('success', 'Your Colocation' . $colocation->name . 'has been created!!');
     }
-    public function join(Request $request)
+    public function join(joinColocationRequest $request)
     {
-        $request->validate(['token' => 'required|string|size:32']);
 
         $colocation = Colocation::where('invite_token', $request->token)
                 ->where('status', 'active')
@@ -114,9 +112,8 @@ class ColocationController extends Controller
         return view('colocation.dashboard', compact('colocation','totalSpent','totalToReceive', 'totalToPay'));
 
     }
-    public function sendInvite(Request $request)
+    public function sendInvite(SendInviteRequest $request)
     {
-        $request->validate(['email' => 'required|email']);
         $colocation = auth()->user()->currentColocation;
 
         //send the email
