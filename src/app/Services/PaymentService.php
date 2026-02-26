@@ -12,9 +12,11 @@ class PaymentService
     public function splitExpense(Expense $expense)
     {
         $colocation = $expense->colocation;
-        $activeMembers = $colocation->members;
+        $activeMembers = $colocation->member()->withPivot('left_at', null)->get();
         $count = $activeMembers->count();
-        $splitAmount = $expense->amount / $count;
+        if($count <= 1) return;
+
+        $splitAmount = round($expense->amount / $count, 2);
 
         foreach ($activeMembers as $member){
             if($member->id !== $expense->user_id){
@@ -31,11 +33,12 @@ class PaymentService
     //transfer the dept to the owner
     public function removeMemberWithDept(int $memberId,int $ownerId)
     {
-        Payment::where('debtor_id', $memberId)
-            ->where('status', 'pending')
-            ->update(['debtor_id' => $ownerId]);
-        $member = User::find($memberId);
-        $member->reputation_score -= 1;
-        $member->save();
+        db::transaction(function () use ($memberId, $ownerId){
+            Payment::where('debtor_id',$memberId)
+                ->where('status', 'pending')
+                ->update(['debtor_id' => $ownerId]);
+        });
+        $member = User::findOrFail($memberId);
+        $member->decrement('reputation_score', 1);
     }
 }
