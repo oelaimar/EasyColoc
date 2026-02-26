@@ -9,12 +9,9 @@ class SendInviteRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $user = auth()->user();
-        if(!$user->current_colocation_id){
-            return false;
-        }
+        $user = $this->user();
         //only the owner of a colocation can send invitation
-        return $this->user->memberships()
+        return $user->memberships()
             ->where('colocation_id', $user->current_colocation_id)
             ->where('role', 'owner')
             ->exists();

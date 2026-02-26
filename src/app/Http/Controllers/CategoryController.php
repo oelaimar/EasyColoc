@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,7 @@ class CategoryController extends Controller
         return view('categories.index', compact('categories'));
     }
 
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
         $user = auth()->user();
         $colocation = $user->currentColocation;
@@ -23,9 +24,7 @@ class CategoryController extends Controller
         if($colocation->owner()->id !== $user->id){
             return back()->with('error', 'only the owner can manage categories.');
         }
-        $request->validate([
-            'name' => 'required|string|max:50',
-        ]);
+
         $colocation->categories()->create([
             'name' => $request->name,
         ]);
