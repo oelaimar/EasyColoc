@@ -16,6 +16,11 @@ class ExpenseController extends Controller
         $user = auth()->user();
         $colocation = $user->currentColocation;
 
+        if(!$colocation){
+            return redirect()->route('colocations.create')
+                ->with('info', 'please create or join a colocation first');
+        }
+
         $query = $colocation->expenses()->with(['category', 'user']);
 
         if ($request->has('month') && $request->month != 'all') {
