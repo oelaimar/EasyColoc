@@ -22,14 +22,14 @@ class CategoryController extends Controller
         $user = auth()->user();
         $colocation = $user->currentColocation;
 
-        if($colocation->owner()->id !== $user->id){
+        if ($colocation->owner()?->id !== $user->id) {
             return back()->with('error', 'only the owner can manage categories.');
         }
 
         $colocation->categories()->create([
             'name' => $request->name,
         ]);
-        return back()->with('success','Category added');
+        return back()->with('success', 'Category added');
     }
 
     public function destroy(DestroyCategoryRequest $request, Category $category)

@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Facades\Gate::define('admin-only', function (\App\Models\User $user) {
+            return $user->is_global_admin === true;
+        });
     }
 }

@@ -12,11 +12,15 @@ class Colocation extends Model
         'invite_token',
     ];
 
+    public function memberships()
+    {
+        return $this->hasMany(Membership::class);
+    }
     public function members()
     {
         return $this->belongsToMany(User::class, 'memberships')
-                    ->withPivot('role', 'join_at', 'left_at')
-                    ->wherePivotNull('left_at');
+            ->withPivot('role', 'join_at', 'left_at')
+            ->wherePivotNull('left_at');
     }
     public function expenses()
     {

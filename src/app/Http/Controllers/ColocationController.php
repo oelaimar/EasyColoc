@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Middleware\CheckSingleColocation;
-use App\Http\Requests\JoinColocationRequest;
 use App\Http\Requests\SendInviteRequest;
 use App\Http\Requests\StoreColocationRequest;
 use App\Mail\ColocationInvite;
@@ -11,25 +9,26 @@ use App\Models\Colocation;
 use App\Models\Membership;
 use App\Models\Payment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ColocationController extends Controller
 {
-    public function create(Request $request)
+    public function create()
     {
         return view('colocation.create');
     }
+
     public function store(StoreColocationRequest $request)
     {
-        //create Colocation
+        // Create Colocation
         $colocation = Colocation::create([
             'name' => $request->name,
             'invite_token' => Str::random(32),
             'status' => 'active',
         ]);
-        //create Membership
+
+        // Create Membership
         Membership::create([
             'user_id' => auth()->id(),
             'colocation_id' => $colocation->id,
@@ -37,65 +36,30 @@ class ColocationController extends Controller
             'join_at' => now(),
         ]);
 
-        //update user currentColocation
+        // Update user currentColocation
         auth()->user()->update(['current_colocation_id' => $colocation->id]);
 
-        return redirect()->route('colocations.show', $colocation)
-            ->with('success', 'Your Colocation ' . $colocation->name . ' has been created!!');
+        // Bug 6 fixed: no route parameter passed to a parameterless route
+        return redirect()->route('dashboard')
+            ->with('success', 'Your Colocation ' . $colocation->name . ' has been created!');
     }
-    public function join(JoinColocationRequest $request)
-    {
 
-        $colocation = Colocation::where('invite_token', $request->token)
-                ->where('status', 'active')
-                ->first();
-
-        if (!$colocation) {
-            return back()->withErrors(['token' => 'This invitation token is invalid or the group no longer exists.']);
-        }
-        Membership::create([
-            'user_id' => auth()->id(),
-            'colocation_id' => $colocation->id,
-            'role' => 'member',
-            'join_at' => now()
-        ]);
-        auth()->user()->update(['current_colocation_id' => $colocation->id]);
-
-        return redirect()->route('colocations.show')
-            ->with('success', 'welcome to ' . $colocation->name . '!');
-    }
-    public function leave()
-    {
-        $user = auth()->user();
-        $colocationId = $user->current_colocation_id;
-
-        Membership::where('user_id', $user->id)
-            ->where('colocation_id', $colocationId)
-            ->whereNull('left_at')
-            ->update(['left_at' => now()]);
-
-        $user->update(['current_colocation_id' => null]);
-
-        return redirect()->route('colocations.create')
-            ->with('success', 'You are left the colocation.');
-    }
     public function show()
     {
         $user = auth()->user();
         $colocationId = $user->current_colocation_id;
+
         if (!$colocationId) {
             return redirect()->route('colocations.create');
         }
 
-        //the colocation with all member that enroll on it
+        // Bug 9 fixed: removed redundant ->wherePivotNull('left_at') — already in members() scope
         $colocation = Colocation::with([
-            'members' => function($query){
-                $query->wherePivotNull('left_at', null);
-            },
-            'expenses' => function($query) {
-                $query->latest()->limit(5);
+            'members',
+            'expenses' => function ($query) {
+                $query->with('user')->latest()->limit(5);
             }
-            ])->findOrFail($user->current_colocation_id);
+        ])->findOrFail($user->current_colocation_id);
 
         $totalSpent = $colocation->expenses()->sum('amount');
 
@@ -109,16 +73,57 @@ class ColocationController extends Controller
             ->where('status', 'pending')
             ->sum('amount');
 
-        return view('colocation.dashboard', compact('colocation','totalSpent','totalToReceive', 'totalToPay'));
-
+        return view('colocation.dashboard', compact('colocation', 'totalSpent', 'totalToReceive', 'totalToPay'));
     }
+
+    public function invitePage()
+    {
+        return view('colocation.invite');
+    }
+
     public function sendInvite(SendInviteRequest $request)
     {
         $colocation = auth()->user()->currentColocation;
 
-        //send the email
         Mail::to($request->email)->send(new ColocationInvite($colocation));
 
-        return back()->with('success', 'invitation sent to' . $request->email);
+        // Bug 16 fixed: added missing space before email address
+        return back()->with('success', 'Invitation sent to ' . $request->email);
+    }
+
+    public function destroy(Request $request)
+    {
+        $user = auth()->user();
+        $colocation = $user->currentColocation;
+
+        if (!$colocation) {
+            return redirect()->route('colocations.create');
+        }
+
+        $owner = $colocation->owner();
+
+        // Only the owner can delete
+        if (!$owner || $user->id !== $owner->id) {
+            abort(403, 'Only the owner can delete this colocation.');
+        }
+
+        // Validate password for confirmation
+        $request->validateWithBag('colocationDeletion', [
+            'password' => ['required', 'current_password'],
+        ]);
+
+        // Detach all active members (clear their current_colocation_id)
+        $colocation->memberships()
+            ->whereNull('left_at')
+            ->with('user')
+            ->get()
+            ->each(function ($membership) {
+                $membership->user?->update(['current_colocation_id' => null]);
+            });
+
+        $colocation->delete();
+
+        return redirect()->route('colocations.create')
+            ->with('success', 'The colocation has been deleted.');
     }
 }

@@ -35,7 +35,7 @@ class MembershipController extends Controller
 
         auth()->user()->update(['current_colocation_id' => $colocation->id]);
 
-        return redirect()->route('colocations.show')
+        return redirect()->route('dashboard')
             ->with('success', 'Welcome to ' . $colocation->name . '!');
     }
     public function destroy(Membership $membership)
@@ -43,9 +43,25 @@ class MembershipController extends Controller
         $user = auth()->user();
         $colocation = $user->currentColocation;
 
-        //this is for the owner can remove member or member can leave(403 forbidding)
-        if ($user->id !== $colocation->owner()->id && $user->id !== $membership->user_id) {
+        if (!$colocation) {
+            abort(403, 'You are not part of a colocation.');
+        }
+
+        $owner = $colocation->owner();
+
+        // Guard: if we can't resolve the owner, deny access
+        if (!$owner) {
+            abort(403, 'Cannot determine colocation owner.');
+        }
+
+        //this is for the owner can remove member or member can leave (403 forbidding)
+        if ($user->id !== $owner->id && $user->id !== $membership->user_id) {
             abort(403, 'Unauthorized action.');
+        }
+
+        // Owner cannot leave — they must delete the colocation instead
+        if ($user->id === $owner->id && $membership->user_id === $owner->id) {
+            return back()->withErrors(['leave' => 'As the owner, you cannot leave. You must delete the colocation instead.']);
         }
         $hasDebt = Payment::where('debtor_id', $membership->user_id)
             ->where('colocation_id', $colocation->id)
@@ -54,13 +70,20 @@ class MembershipController extends Controller
         if ($hasDebt) {
             $this->paymentService->removeMemberWithDebt(
                 $membership->user_id,
-                $colocation->owner()->id,
+                $owner->id,
             );
         }
+        $isLeavingMyself = $user->id === $membership->user_id;
+
         $membership->update(['left_at' => now()]);
         $membership->user->update(['current_colocation_id' => null]);
 
-        return redirect()->route('colocations.create')
+        if ($isLeavingMyself) {
+            return redirect()->route('colocations.create')
+                ->with('success', 'You have left the colocation.');
+        }
+
+        return redirect()->route('colocations.invite')
             ->with('success', 'Member removed and outstanding debts transferred to owner.');
     }
 }

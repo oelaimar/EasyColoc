@@ -14,7 +14,7 @@ class Expense extends Model
         'title',
         'date',
     ];
-    public function payer()
+    public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
