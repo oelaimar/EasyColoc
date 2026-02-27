@@ -19,7 +19,7 @@ class SendInviteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'max:225']
+            'email' => ['required', 'string', 'email', 'max:255']
         ];
     }
     public function messages(): array

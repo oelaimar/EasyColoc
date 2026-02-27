@@ -18,6 +18,7 @@ class User extends Authenticatable
         'is_banned',
         'is_global_admin',
         'current_colocation_id',
+        'reputation_score',
     ];
     protected $hidden = [
         'password',
@@ -25,8 +26,8 @@ class User extends Authenticatable
     ];
     protected static function booted()
     {
-        static::creating(function ($user){
-            if(static::count() === 0){
+        static::creating(function ($user) {
+            if (static::count() === 0) {
                 $user->is_global_admin = true;
             }
         });
@@ -36,7 +37,10 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
+            'is_global_admin'   => 'boolean',
+            'is_banned'         => 'boolean',
+            'is_admin'          => 'boolean',
         ];
     }
     public function memberships()

@@ -16,16 +16,16 @@ class ExpenseController extends Controller
         $user = auth()->user();
         $colocation = $user->currentColocation;
 
-        $query = $colocation->expenses()->with(['category','payer']);
+        $query = $colocation->expenses()->with(['category', 'user']);
 
-        if($request->has('month') && $request->month != 'all'){
+        if ($request->has('month') && $request->month != 'all') {
             $date = Carbon::parse($request->month);
             $query->whereMonth('date', $date->month)
                 ->whereYear('date', $date->year);
         }
 
         $expenses = $query->get();
-        $categories = Category::all();
+        $categories = $colocation->categories;
 
         return view('expenses.index', compact('expenses', 'categories'));
     }
@@ -36,8 +36,8 @@ class ExpenseController extends Controller
         $colocation = $user->currentColocation;
 
         $expense = $colocation->expenses()->create($request->validated() + [
-                'user_id' => auth()->id()
-            ]);
+            'user_id' => auth()->id()
+        ]);
         $paymentService->splitExpense($expense);
 
         return back()->with('success', 'Expense split successfully!');

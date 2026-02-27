@@ -9,22 +9,23 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function(){
-    if(auth()->check()){
-        return redirect()->route('colocations.show');
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
     }
-    return view('welcome');
-});
+    return redirect()->route('login');
+})->name('/');
 
 Route::middleware('auth')->group(function () {
 
-    //Admin toggle the ban and unban
-    Route::middleware(['auth', 'can:admin-only'])->prefix('admin')->group(function(){
-       Route::post('/user/{user}/toggle-ban',[AdminUserController::class, 'toggleBan'])->name('admin.user.toggleBan');
+    // Admin routes (admin-only gate)
+    Route::middleware(['auth', 'can:admin-only'])->prefix('admin')->group(function () {
+        Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+        Route::post('/user/{user}/toggle-ban', [AdminUserController::class, 'toggleBan'])->name('admin.user.toggleBan');
     });
 
     // Users without a colocation
-    Route::middleware(['single.colocation'])->group(function (){
+    Route::middleware(['single.colocation'])->group(function () {
         Route::get('/colocations/create', [ColocationController::class, 'create'])->name('colocations.create');
         Route::post('/colocations', [ColocationController::class, 'store'])->name('colocations.store');
 
@@ -32,10 +33,11 @@ Route::middleware('auth')->group(function () {
     });
 
     // Users that have a colocation
+    Route::get('/dashboard', [ColocationController::class, 'show'])->name('dashboard');
 
-    Route::get('/dashboard', [ColocationController::class, 'show'])->name('colocations.show');
+    Route::delete('/memberships/{membership}/leave', [MembershipController::class, 'destroy'])->name('memberships.leave');
 
-    Route::delete('/memberships/leave', [MembershipController::class, 'destroy'])->name('memberships.leave');
+    Route::get('/colocations/invite', [ColocationController::class, 'invitePage'])->name('colocations.invite');
 
     // Expenses
     Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
@@ -50,8 +52,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
-    // Email Invitations (Owner Only)
+    // Email Invitations — POST only (send the invite email)
     Route::post('/colocations/invite', [ColocationController::class, 'sendInvite'])->name('colocations.sendInvite');
+
+    // Delete colocation (owner only)
+    Route::delete('/colocations', [ColocationController::class, 'destroy'])->name('colocations.destroy');
+
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -59,4 +65,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

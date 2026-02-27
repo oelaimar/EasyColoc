@@ -19,16 +19,21 @@ class PaymentController extends Controller
             ->with('debtor')
             ->get();
 
-        //whet people should pay you
-        $debts = Payment::where('creditor_id', $user->id)
+        $debts = Payment::where('debtor_id', $user->id)
             ->where('colocation_id', $colocationId)
             ->where('status', 'pending')
             ->with('creditor')
             ->get();
-        return view('Payments.index', compact('credits', 'debts'));
+
+        return view('payments.index', compact('credits', 'debts'));
     }
+
     public function pay(Payment $payment)
     {
+        if (auth()->id() !== $payment->debtor_id) {
+            abort(403, 'You are not authorized to mark this payment as paid.');
+        }
+
         $payment->update([
             'status' => 'paid',
             'paid_at' => now()

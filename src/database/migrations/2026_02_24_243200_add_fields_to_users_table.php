@@ -18,15 +18,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(["current_colocation_id"]);
-            $table->dropColumn(
-                [
-                    "reputation_score",
-                    "is_admin",
-                    "is_banned",
-                    "current_colocation_id",
-                ]
-            );
+            $table->dropForeign(['current_colocation_id']);
+            $table->dropColumn([
+                'reputation_score',
+                'is_global_admin',
+                'is_banned',
+                'current_colocation_id',
+            ]);
         });
     }
 };

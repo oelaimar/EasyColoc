@@ -10,7 +10,7 @@ class CheckSingleColocation
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->user()->current_colocation_id && $request->is('colocations/create')) {
+        if (auth()->user()->current_colocation_id) {
             return redirect()->route('dashboard')->with('error', 'You are already in a colocation.');
         }
         return $next($request);
