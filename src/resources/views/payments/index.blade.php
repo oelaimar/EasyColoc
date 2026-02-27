@@ -57,14 +57,15 @@
                         </p>
                     </div>
                     <div class="shrink-0">
-                        <form action="{{ route('payments.pay', $p) }}" method="POST">
-                            @csrf
-                            @if($isCreditor)
-                            <button type="submit" class="flex min-w-[110px] items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary/10 text-primary hover:bg-primary hover:text-white text-sm font-bold transition-all">
+                        @if($isCreditor)
+                            <button class="flex min-w-[110px] items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary/10 text-primary">
                                 <span class="material-symbols-outlined text-[18px]">check_circle</span>
-                                <span class="truncate">Mark Paid</span>
+                                <span class="truncate">waiting to be paid</span>
                             </button>
                             @else
+                        <form action="{{ route('payments.pay', $p) }}" method="POST">
+                            @csrf
+                            
                             <button type="submit" class="flex min-w-[110px] items-center justify-center gap-2 rounded-lg h-10 px-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-white text-sm font-bold transition-all">
                                 <span class="material-symbols-outlined text-[18px]">payments</span>
                                 <span class="truncate">Pay Now</span>
@@ -73,7 +74,7 @@
                         </form>
                     </div>
                 </div>
-                @empty
+                @empty                                  
                 <div class="p-10 text-center bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
                     <div class="inline-flex items-center justify-center size-16 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 mb-4">
                         <span class="material-symbols-outlined text-3xl">done_all</span>

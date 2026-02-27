@@ -38,6 +38,9 @@ class PaymentController extends Controller
             'status' => 'paid',
             'paid_at' => now()
         ]);
+
+        $payment->debtor->increment('reputation_score', 1);
+
         return back()->with('success', 'Marked as paid.');
     }
 }
